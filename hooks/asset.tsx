@@ -10,10 +10,10 @@ export async function accountExists(umi: Umi, account: PublicKey) {
   return false;
 }
 
-export const useAssetJson = (asset: Pick<AssetV1, 'publicKey' | 'uri'>) => useQuery({
-  queryKey: ['fetch-asset-json', asset.publicKey],
+export const useAssetJson = (address: PublicKey, uri: string) => useQuery({
+  queryKey: ['fetch-asset-json', address],
   queryFn: async () => {
-    const j = await (await fetch(asset.uri)).json();
+    const j = await (await fetch(uri)).json();
     return j;
   },
 });
@@ -30,7 +30,7 @@ export const useUriBlob = (uri: string) => useQuery({
 });
 
 export const useAssetJsonWithImage = (asset: Pick<AssetV1, 'publicKey' | 'uri'>) => {
-  const { isPending: jsonPending, data: json } = useAssetJson(asset);
+  const { isPending: jsonPending, data: json } = useAssetJson(asset.publicKey, asset.uri);
   const { isPending: imagePending, data: blob } = useUriBlob(json?.image);
 
   return { isPending: jsonPending || imagePending, json, image: blob };

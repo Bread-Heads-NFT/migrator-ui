@@ -1,16 +1,19 @@
+/* eslint-disable react/jsx-closing-tag-location */
+/* eslint-disable jsx-a11y/media-has-caption */
+
 'use client';
 
-import { Container, Title, Button, Group, Text, List, ThemeIcon, rem, Box, Flex, Stack, Alert, Image } from '@mantine/core';
+import { Container, Title, Button, Group, Text, List, ThemeIcon, rem } from '@mantine/core';
 import { IconNotes } from '@tabler/icons-react';
 import Link from 'next/link';
 import classes from './Landing.module.css';
 import RetainQueryLink from '../RetainQueryLink';
-import { FeaturesCards } from './FeaturesCards';
+// import { FeaturesCards } from './FeaturesCards';
 
 const links: { label: string; href: string }[] = [
-  { label: 'Mantine Docs', href: 'https://mantine.dev/' },
-  { label: 'Metaplex Docs', href: 'https://developers.metaplex.com/' },
-  { label: 'Umi Framework', href: 'https://developers.metaplex.com/umi' },
+  { label: 'Bread Heads', href: 'https://breadheads.io/' },
+  { label: 'Buy a Bread Head', href: 'https://www.tensor.trade/trade/lgtb' },
+  { label: 'BreadBox DAO', href: 'https://app.realms.today/dao/BLyCvYF6gBxnSwQ7bSDxmGydpZBxTjKYNHnwua47nbjn' },
   { label: 'Solana Digital Assets', href: 'https://developers.metaplex.com/core' },
 ];
 
@@ -22,10 +25,10 @@ export function Landing() {
           <div className={classes.inner}>
             <div className={classes.content}>
               <Title className={classes.title}>
-                Build a UI using Mantine and Metaplex!
+                All the NFT tools you need, in one place
               </Title>
               <Text c="dimmed" mt="md">
-                Mantine is a React component library with a focus on usability and accessibility. Metaplex Umi is a TypeScript framework for building on Solana. This template combines the two to provide a starting point for building a Solana UI.
+                The BHS Tools Suite is a collection of tools that help you create, manage, and use digital assets to their fullest. It is built on top of the Metaplex platform and is designed to be easy to use and powerful.
               </Text>
 
               <List
@@ -51,31 +54,32 @@ export function Landing() {
               </List>
 
             </div>
-            <Image src="./hero.png" className={classes.image} />
+            <video src="/hero.mp4" autoPlay muted loop className={classes.image} />
           </div>
           <Group pb={60} mt="md">
-            <RetainQueryLink href="/create">
+            <RetainQueryLink href="/collectors">
               <Button radius="xl" size="md" className={classes.control}>
-                Create a Digital Asset
+                Collectors
               </Button>
             </RetainQueryLink>
-            <Link href="https://developers.metaplex.com/">
+            <Link href="/creators">
               <Button variant="default" radius="xl" size="md" className={classes.control}>
-                Metaplex Documentation
+                Creators
               </Button>
             </Link>
-            <RetainQueryLink href="/explorer">
+            {/*<RetainQueryLink href="/explorer">
               <Button variant="outline" radius="xl" size="md" className={classes.control}>
                 View Assets
               </Button>
-            </RetainQueryLink>
+            </RetainQueryLink> */}
           </Group>
         </Container>
+        {/* <FeaturesCards /> */}
       </div>
-      <Box bg="rgb(12, 12, 12)" pb="xl" pt="md">
+      {/* <Box bg="rgb(12, 12, 12)" pb="xl" pt="md">
         <FeaturesCards />
         <Container size="md" py="xl" />
-      </Box>
+      </Box> */}
       <div style={{
         position: 'relative',
       }}

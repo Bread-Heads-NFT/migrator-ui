@@ -1,20 +1,19 @@
-import { Center, Container, Flex, Group, Menu, Title } from '@mantine/core';
-import { IconChevronDown } from '@tabler/icons-react';
+import { Center, Container, Flex, Group, Menu, Title, Image, rem } from '@mantine/core';
+import { IconArrowRightToArc, IconChevronDown } from '@tabler/icons-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 import classes from './Header.module.css';
-import { MetaplexLogo, MetaplexLogoVariant } from '../MetaplexLogo';
 import { Env } from '@/providers/useEnv';
 import RetainQueryLink from '../RetainQueryLink';
 
-const HeaderLink = ({ label, link, disabled }: { label: string, link: string, disabled?: boolean }) => {
-  const cls = disabled ? [classes.disabled, classes.link].join(' ') : classes.link;
-  return (
-    <RetainQueryLink href={link} className={cls}>
-      {label}
-    </RetainQueryLink>
-  );
-};
+// const HeaderLink = ({ label, link, disabled }: { label: string, link: string, disabled?: boolean }) => {
+//   const cls = disabled ? [classes.disabled, classes.link].join(' ') : classes.link;
+//   return (
+//     <RetainQueryLink href={link} className={cls}>
+//       {label}
+//     </RetainQueryLink>
+//   );
+// };
 
 export function Header({ env, setEnv }: { env: string; setEnv: (env: Env) => void }) {
   return (
@@ -26,13 +25,29 @@ export function Header({ env, setEnv }: { env: string; setEnv: (env: Env) => voi
       <div className={classes.inner}>
         <Flex justify="center" align="center" gap="md">
           <RetainQueryLink href="/">
-            <MetaplexLogo variant={MetaplexLogoVariant.Small} />
+            <Image src="/favicon.png" w={50} />
           </RetainQueryLink>
-          <Title order={2}>Metaplex Mantine Template</Title>
+          <Title order={2}>BHS Tools</Title>
         </Flex>
         <Group>
-          <HeaderLink label="Create" link="/create" />
-          <HeaderLink label="Explorer" link="/explorer" />
+          <Menu trigger="click-hover" width={200}>
+            <Menu.Target>
+              <div>Collectors</div>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item leftSection={<IconArrowRightToArc style={{ width: rem(14), height: rem(14) }} />} component="a" href="/collectors/migrate">Migrate</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+          <Menu trigger="click-hover" width={200}>
+            <Menu.Target>
+              <div>Creators</div>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item leftSection={<IconArrowRightToArc style={{ width: rem(14), height: rem(14) }} />} component="a" href="/creators/migrate">Migrate</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+          {/* <HeaderLink label="Create" link="/create" />
+          <HeaderLink label="Explorer" link="/explorer" /> */}
           <WalletMultiButton />
           <Menu trigger="hover" transitionProps={{ exitDuration: 0 }} withinPortal>
             <Menu.Target>

@@ -17,7 +17,7 @@
 
 .heroSection {
   background-color: #000;
-  background-image: url(/hero-background.jpg);
+  background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url(/hero-background.jpg);
   background-position: 0 0;
   background-size: cover;
 }
