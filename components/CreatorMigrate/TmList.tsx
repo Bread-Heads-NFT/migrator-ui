@@ -3,16 +3,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { DigitalAsset, fetchDigitalAssetWithTokenByMint, findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { BGL_MIGRATOR_PROGRAM_ID, migrateTokenMetadata } from '@breadheads/bgl-migrator';
-import { generateSigner, isSome, Transaction } from '@metaplex-foundation/umi';
-import { string, publicKey as publicKeySerializer } from '@metaplex-foundation/umi/serializers';
+import { generateSigner, isSome, PublicKey, Transaction } from '@metaplex-foundation/umi';
+import { string, publicKey as publicKeySerializer, base58 } from '@metaplex-foundation/umi/serializers';
 import { useUmi } from '@/providers/useUmi';
 import { useFetchMigratableTmAssetsByOwner } from '@/hooks/fetch';
 import { SelectableTmCard } from './SelectableTmCard';
+import { notifications } from '@mantine/notifications';
 
 export function TmList() {
   const umi = useUmi();
   const [assets, setAssets] = useState<DigitalAsset[]>([]);
   const [selectedAssets, setSelectedAssets] = useState<DigitalAsset[]>([]);
+  const [migratedAssets, setMigratedAssets] = useState<PublicKey[]>([]);
   const [checked, setChecked] = useState(false);
 
   const { data, error, fetchNextPage, hasNextPage, isFetching } = useFetchMigratableTmAssetsByOwner(umi.identity.publicKey);
@@ -40,6 +42,7 @@ export function TmList() {
 
   const handleOnClick = useCallback(async () => {
     const txes: Transaction[] = [];
+    const mints: PublicKey[] = [];
     // eslint-disable-next-line no-restricted-syntax
     for (const asset of selectedAssets) {
       if (isSome(asset.metadata.collection)) {
@@ -64,17 +67,32 @@ export function TmList() {
         // eslint-disable-next-line no-await-in-loop
         const signedTx = await newAsset.signTransaction(unsignedTx);
         txes.push(signedTx);
+
+        mints.push(asset.publicKey);
       }
     }
 
     const signedTxes = await umi.identity.signAllTransactions(txes);
     // eslint-disable-next-line no-restricted-syntax
     for (const tx of signedTxes) {
+      let currentMint: PublicKey | undefined;
+      mints.forEach((mint) => {
+        if (tx.message.accounts.includes(mint)) {
+          currentMint = mint;
+          setMigratedAssets((prevMigratedAssets) => [...prevMigratedAssets, mint]);
+        }
+      });
       // eslint-disable-next-line no-await-in-loop
-      await umi.rpc.sendTransaction(tx);
+      const res = await umi.rpc.sendTransaction(tx);
+      notifications.show({ id: currentMint, title: `Migrating ${currentMint || ''}`, message: 'TX: ' + base58.deserialize(res), color: 'gray', loading: true });
+      umi.rpc.confirmTransaction(res, { strategy: { type: 'blockhash', ...(await umi.rpc.getLatestBlockhash()) }, }).then((result) => {
+        if (result.value.err) {
+          notifications.update({ id: currentMint, title: `Failed ${currentMint || ''}`, message: 'TX: ' + base58.deserialize(res), color: 'red', loading: false });
+        } else {
+          notifications.update({ id: currentMint, title: `Migrated ${currentMint || ''}`, message: 'TX: ' + base58.deserialize(res), color: 'green', loading: false });
+        }
+      });
     }
-
-    window.location.reload();
   }, [umi, selectedAssets]);
 
   return (
@@ -109,7 +127,7 @@ export function TmList() {
               xl: 6,
             }}
           >
-            {assets.map((asset) => (
+            {assets.filter((asset) => !migratedAssets.includes(asset.publicKey)).map((asset) => (
               <SelectableTmCard asset={asset} key={asset.publicKey} selectedAssets={selectedAssets} setSelectedAssets={setSelectedAssets} />
             ))}
           </SimpleGrid>

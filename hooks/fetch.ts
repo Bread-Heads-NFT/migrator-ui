@@ -209,6 +209,9 @@ export function useFetchMigratableTmAssetsByOwner(owner: PublicKey) {
         console.log(assets);
         // const assets = await umi.rpc.getAssetsByOwner({ owner });
         const filtered = assets.items.filter((asset) => {
+          if (asset.content.metadata.name.includes('test')) {
+            console.log(asset.content.metadata);
+          }
           if (asset.interface !== 'V1_NFT' || asset.compression.compressed) {
             return false;
           }

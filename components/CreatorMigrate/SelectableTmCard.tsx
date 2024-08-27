@@ -14,16 +14,7 @@ export function SelectableTmCard({
   selectedAssets: DigitalAsset[],
   setSelectedAssets: (assets: DigitalAsset[]) => void
 }) {
-  const [selected, setSelected] = useState(false);
   const { error, isPending, data: json } = useAssetJson(asset.publicKey, asset.metadata.uri);
-
-  const handleSelect = () => {
-    if (selected) {
-      setSelectedAssets(selectedAssets.filter((currentAsset) => currentAsset.publicKey !== asset.publicKey));
-    } else {
-      setSelectedAssets([...selectedAssets, asset]);
-    }
-  };
 
   return (
     <Skeleton
@@ -34,10 +25,13 @@ export function SelectableTmCard({
         className={classes.root}
         p="lg"
         radius="md"
-        checked={selected}
+        checked={selectedAssets.find((a) => a.publicKey === asset.publicKey) !== undefined}
         onClick={() => {
-          setSelected(!selected);
-          handleSelect();
+          if (selectedAssets.find((a) => a.publicKey === asset.publicKey) !== undefined) {
+            setSelectedAssets(selectedAssets.filter((a) => a.publicKey !== asset.publicKey));
+          } else {
+            setSelectedAssets([...selectedAssets, asset]);
+          }
         }}
       >
         <Skeleton visible={!!error}>
