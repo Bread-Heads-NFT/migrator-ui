@@ -212,7 +212,7 @@ export function useFetchMigratableTmAssetsByOwner(owner: PublicKey) {
           if (asset.content.metadata.name.includes('test')) {
             console.log(asset.content.metadata);
           }
-          if (asset.interface !== 'V1_NFT' || asset.compression.compressed) {
+          if ((asset.interface !== 'V1_NFT' && asset.interface !== 'ProgrammableNFT') || asset.compression.compressed) {
             return false;
           }
           console.log(asset.content.metadata.name);

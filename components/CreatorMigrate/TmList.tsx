@@ -1,14 +1,15 @@
 import { Alert, Button, Card, Center, Checkbox, Loader, Paper, SimpleGrid, Space, Text, Title } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
-import { DigitalAsset, fetchDigitalAssetWithTokenByMint, findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
+import { DigitalAsset, findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { BGL_MIGRATOR_PROGRAM_ID, migrateTokenMetadata } from '@breadheads/bgl-migrator';
 import { generateSigner, isSome, PublicKey, Transaction } from '@metaplex-foundation/umi';
 import { string, publicKey as publicKeySerializer, base58 } from '@metaplex-foundation/umi/serializers';
+import { notifications } from '@mantine/notifications';
+import { findAssociatedTokenPda, findLargestTokensByMint } from '@metaplex-foundation/mpl-toolbox';
 import { useUmi } from '@/providers/useUmi';
 import { useFetchMigratableTmAssetsByOwner } from '@/hooks/fetch';
 import { SelectableTmCard } from './SelectableTmCard';
-import { notifications } from '@mantine/notifications';
 
 export function TmList() {
   const umi = useUmi();
@@ -52,6 +53,8 @@ export function TmList() {
           publicKeySerializer().serialize(asset.metadata.collection.value.key),
         ]);
         const newAsset = generateSigner(umi);
+        console.log('asset account', asset);
+        console.log('token account', findAssociatedTokenPda(umi, { mint: asset.publicKey, owner: umi.identity.publicKey }));
         // eslint-disable-next-line no-await-in-loop
         const unsignedTx = await migrateTokenMetadata(umi, {
           collectionMetadata,
@@ -59,7 +62,7 @@ export function TmList() {
           edition: asset.edition!.publicKey,
           mint: asset.publicKey,
           // eslint-disable-next-line no-await-in-loop
-          token: (await fetchDigitalAssetWithTokenByMint(umi, asset.publicKey)).token.publicKey,
+          token: findAssociatedTokenPda(umi, { mint: asset.publicKey, owner: umi.identity.publicKey }),
           asset: newAsset,
           collection: coreCollectionPda,
           updateAuthority: asset.metadata.updateAuthority,
@@ -84,12 +87,12 @@ export function TmList() {
       });
       // eslint-disable-next-line no-await-in-loop
       const res = await umi.rpc.sendTransaction(tx);
-      notifications.show({ id: currentMint, title: `Migrating ${currentMint || ''}`, message: 'TX: ' + base58.deserialize(res), color: 'gray', loading: true });
-      umi.rpc.confirmTransaction(res, { strategy: { type: 'blockhash', ...(await umi.rpc.getLatestBlockhash()) }, }).then((result) => {
+      notifications.show({ id: currentMint, title: `Migrating ${currentMint || ''}`, message: `TX: ${base58.deserialize(res)}`, color: 'gray', loading: true });
+      umi.rpc.confirmTransaction(res, { strategy: { type: 'blockhash', ...(await umi.rpc.getLatestBlockhash()) } }).then((result) => {
         if (result.value.err) {
-          notifications.update({ id: currentMint, title: `Failed ${currentMint || ''}`, message: 'TX: ' + base58.deserialize(res), color: 'red', loading: false });
+          notifications.update({ id: currentMint, title: `Failed ${currentMint || ''}`, message: `TX: ${base58.deserialize(res)}`, color: 'red', loading: false });
         } else {
-          notifications.update({ id: currentMint, title: `Migrated ${currentMint || ''}`, message: 'TX: ' + base58.deserialize(res), color: 'green', loading: false });
+          notifications.update({ id: currentMint, title: `Migrated ${currentMint || ''}`, message: `TX: ${base58.deserialize(res)}`, color: 'green', loading: false });
         }
       });
     }
